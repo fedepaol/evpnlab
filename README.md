@@ -5,3 +5,4 @@ This repo serves as a collection of experiments for working with FRR and EVPN.
 ## Sections (so far only one)
 
 - [01_clab_l3](./01_clab_l3): a spine - leaf topology with l3 evpn tunnel
+- [02_clab_l2](./02_clab_l2): a spine - leaf topology with l2 evpn tunnel
