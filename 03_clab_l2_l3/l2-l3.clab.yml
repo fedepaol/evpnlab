@@ -1,0 +1,81 @@
+name: evpnl2-l3
+
+topology:
+  nodes:
+    leaf1:
+      kind: linux
+      image: quay.io/frrouting/frr:9.0.0
+      binds:
+        - leaf1/daemons:/etc/frr/daemons
+        - leaf1/frr.conf:/etc/frr/frr.conf
+        - leaf1/vtysh.conf:/etc/frr/vtysh.conf
+        - leaf1/setup.sh:/setup.sh
+    leaf2:
+      kind: linux
+      image: quay.io/frrouting/frr:9.0.0
+      binds:
+        - leaf2/daemons:/etc/frr/daemons
+        - leaf2/vtysh.conf:/etc/frr/vtysh.conf
+        - leaf2/frr.conf:/etc/frr/frr.conf
+        - leaf2/setup.sh:/setup.sh
+    spine:
+      kind: linux
+      image: quay.io/frrouting/frr:9.0.0
+      binds:
+        - spine/daemons:/etc/frr/daemons
+        - spine/vtysh.conf:/etc/frr/vtysh.conf
+        - spine/frr.conf:/etc/frr/frr.conf
+        - spine/setup.sh:/setup.sh
+
+    HOST_LAN1_1:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - host_lan1_1/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+    HOST_LAN1_2:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - host_lan1_2/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+    HOST_LAN2_1:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - host_lan2_1/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+    HOST_LAN2_2:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - host_lan2_2/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+    HOST_L3_1:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - host_l3_1/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+    HOST_L3_2:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - host_l3_2/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+
+  links:
+    - endpoints: ["leaf1:eth1", "spine:eth1"]
+    - endpoints: ["leaf2:eth1", "spine:eth2"]
+    - endpoints: ["HOST_LAN1_1:eth1", "leaf1:eth2"]
+    - endpoints: ["HOST_LAN2_1:eth1", "leaf1:eth3"]
+    - endpoints: ["HOST_LAN1_2:eth1", "leaf2:eth2"]
+    - endpoints: ["HOST_LAN2_2:eth1", "leaf2:eth3"]
+    - endpoints: ["HOST_L3_1:eth1", "leaf1:eth4"]
+    - endpoints: ["HOST_L3_2:eth1", "leaf2:eth4"]
