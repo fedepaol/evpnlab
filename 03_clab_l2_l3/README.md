@@ -1,59 +1,75 @@
 # Topology
 
-The idea of this lab is to have a spine - leaves topology where the two hosts are connected to two different leaves
-via a L3 connection.
+This is a followup of the previous [01_clab_l3](./01_clab_l3) and [02_clab_l2](./02_clab_l2) labs, mixing all togheter:
 
+- one single L3 VRF
+- two separate L2 VRFs (192.168.10.0/24 and 192.168.11.0/24), under the same L3 VRF
+- two other hosts connected via L3 to the leaves
 
 ```raw
 
 
-            ┌─────────┐
-            │         │
-            │  64612  │
-            │         │
-            └────┬────┘
-                 │
-                 │
-         ┌───────┴────────┐
-         │                │
-    ┌────┴────┐      ┌────┴────┐
-    │         │      │         │
-    │  64512  │      │  64512  ├───────┐
-    │         │      │         │       │
-    └────┬────┘      └────┬────┘       │
-         │                │            │        L2
-    ┌────┴────┐     ┌─────┴────┐  ┌────┴─────┐
-    │         │     │          │  │          │
-    │  Host1  │     │   Host2  │  │   Host2  │
-    │         │     │          │  │          │
-    └─────────┘     └──────────┘  └──────────┘
 
-192.168.10.2/24    192.168.10.3/24   192.168.10.4/24
+
+                            ┌─────────┐
+                            │         │
+                            │ spine   │
+                            │         │
+                            └────┬────┘
+                                 │
+                                 │
+                         ┌───────┴────────┐
+                         │                │
+     ┌──────────┐   ┌────┴────┐      ┌────┴────┐    ┌──────────┐
+     │          │L3 │         │      │         │    │          │
+     │ HostL3   ├───┤  leaf1  │      │  leaf2  ├────┤ HostL3   │
+     │          │   │         │      │         │    │          │
+     └──────────┘   └──┬──┬───┘      └────┬─┬──┘    └──────────┘
+                       │  │               │ │
+              ┌────────┘  │               │ │
+              │   L2      │ L2         L2 │ └──────────┐ L2
+              │           │               │            │
+        ┌─────┴────┐  ┌───┴──────┐  ┌─────┴────┐  ┌────┴─────┐
+        │          │  │          │  │          │  │          │
+        │ HostL2_1 │  │ HostL2_2 │  │ HostL2_2 │  │ HostL2_1 │
+        │          │  │          │  │          │  │          │
+        └──────────┘  └──────────┘  └──────────┘  └──────────┘
+
+
 ```
 
-We want to connect the two hosts via a VXLan tunnel using L2Evpn routes.
+Logically, the configuration is as follows:
+
+- two separate L2 domains belonging to the same L3 domain
+- two extra hosts connected via L3 to the L3 VRF
 
 ```raw
 
-    ┌─────────┐           ┌─────────┐
-    │         │   VXLan   │         │
-    │  6451┌──┼───────────┼─┐64512  ├───────┐
-    │      │  │           │ │       │       │
-    └────┬─┴──┘           └─┴──┬────┘       │
-         │                     │            │        L2
-    ┌────┴────┐          ┌─────┴────┐  ┌────┴─────┐
-    │         │          │          │  │          │
-    │  Host1  │          │   Host2  │  │   Host2  │
-    │         │          │          │  │          │
-    └─────────┘          └──────────┘  └──────────┘
-
-192.168.10.2/24         192.168.10.3/24   192.168.10.4/24
+               ┌────────────────────────────┐
+               │                            │
+               │       L3 VRF               │
+               │ │                        │ │
+               │ │                        │ │
+┌──────────┐   │ │ ┌────────────────────┐ │ │   ┌──────────┐
+│          │L3 │ │ │          L2 VRF    │ │ │   │          │
+│ HostL3   ├───┼─┘ │  ┌───────────────┐ │ └─┼───┤ HostL3   │
+│          │   │   │  │               │ │   │   │          │
+└──────────┘   └───┼──┼───────────────┼─┼───┘   └──────────┘
+                   │  │               │ │
+          ┌────────┘  │               │ │
+          │   L2      │ L2         L2 │ └──────────┐ L2
+          │           │               │            │
+    ┌─────┴────┐  ┌───┴──────┐  ┌─────┴────┐  ┌────┴─────┐
+    │          │  │          │  │          │  │          │
+    │ HostL2_1 │  │ HostL2_2 │  │ HostL2_2 │  │ HostL2_1 │
+    │          │  │          │  │          │  │          │
+    └──────────┘  └──────────┘  └──────────┘  └──────────┘
 
 ```
 
 ## How to start
 
-The lab leverages [containerlab](https://containerlab.dev/). The [clab file](./l2.clab.yaml) contains the definition
+The lab leverages [containerlab](https://containerlab.dev/). The [clab file](./l2-l3.clab.yaml) contains the definition
 of the FRR containers and of the two "host" containers, plus how they are connected together.
 
 A convenience [setup.sh](./setup.sh) script is provided, to start the lab and execute the various setup commands inside the containers.
@@ -71,20 +87,24 @@ For example, in the [leaf1 setup configuration file](./leaf1/setup.sh) we:
 - Create a linux VRF corresponding to the L3 VRF
 - Create all the machinery to make the EVPN / VXLan tunnel work, including a linux bridge and a VXLan interface
 - Enslave the veth leg connected to the HOST to the bridge connected to the vxlan interface
+- Create the linux bridges for the two separate L2 domains
+- Create a VXLan interface enslaved to those linux bridges
+- Enslave the veths corresponding to the L2 hosts to the respective linux bridge
 
 
 ## Validating
 
-Pinging HOST2 from HOST1 should work:
+Pinging HOST_L3_2 from HOST_L3_1 should work:
 
 ```
-docker exec -it clab-evpnl2-HOST1 /bin/bash -c "ping -c 1 192.168.10.4"
-PING 192.168.10.4 (192.168.10.4) 56(84) bytes of data.
-64 bytes from 192.168.10.4: icmp_seq=1 ttl=64 time=0.115 ms
+docker exec clab-evpnl2-l3-HOST_L3_1 /bin/bash -c "ping -c 1 192.170.10.2"
+PING 192.170.10.2 (192.170.10.2) 56(84) bytes of data.
+64 bytes from 192.170.10.2: icmp_seq=1 ttl=62 time=0.147 ms
 
---- 192.168.10.4 ping statistics ---
+--- 192.170.10.2 ping statistics ---
 1 packets transmitted, 1 received, 0% packet loss, time 0ms
-rtt min/avg/max/mdev = 0.115/0.115/0.115/0.000 ms
+rtt min/avg/max/mdev = 0.147/0.147/0.147/0.000 ms
+
 ```
 
 It works! Also, let's make sure it's working through a vxlan tunnel:
