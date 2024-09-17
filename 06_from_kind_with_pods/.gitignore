@@ -1,0 +1,5 @@
+clab-kind
+*.bak
+kubeconfig
+.swp
+clab-kindpods
