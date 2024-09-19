@@ -37,3 +37,7 @@ docker exec clab-kindpods-HOST1 /setup.sh
 
 kubectl apply -f frrpods/controller/controller.yaml
 kubectl apply -f frrpods/frr/frrpod.yaml
+
+sleep 4s
+kubectl exec -n frrtest controller /tmp/setup.sh
+kubectl exec -n frrtest frr /tmp/setup.sh

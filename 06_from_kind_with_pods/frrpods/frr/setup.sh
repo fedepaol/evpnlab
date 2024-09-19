@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 set -x
 
 ip addr add 192.168.11.3/24 dev eth1

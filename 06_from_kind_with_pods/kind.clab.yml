@@ -31,7 +31,7 @@ topology:
       image: praqma/network-multitool:latest
       binds:
         - host1/setup.sh:/setup.sh
-      cmd: bash /setup.sh
+      cmd: sleep INF
 
     k0:
       kind: k8s-kind

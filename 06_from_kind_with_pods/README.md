@@ -1,17 +1,22 @@
 # Topology
 
-The idea of this lab is to have a spine - leaves topology with a host connected on one leaf, and the node of a kind cluster connected
-to the other leaf via a L3 connection.
+This lab is basically the same as the [04_from_kind](../04_from_kind) one, with a spine - leaves topology with a host connected on one leaf,
+and the node of a kind cluster connected to the other leaf via a L3 connection.
 
 ![](images/routerkind.png)
 
-Inside the Kind node we have a topology like the following:
+The main difference here is that we go from the host layout we had:
 
 ![](images/routerkind-inside.png)
 
-- an FRR instance running inside a container, connected to the leaf
-- a Veth leg (ideally, one per VRF) to connect the containerized FRR to the host
-- an [FRR-K8s instance](https://github.com/metallb/frr-k8s/) running on the node, peered with the other FRR through the Veth
+to a pod based one, where:
+
+- the FRR container runs in a namespaced pod
+- an external "controller" pod, which is hostnetwork-namespaced and has a way to access both the containerd socket and
+to the namespaces sysfs is in charge of moving the eth1 interface inside the FRR pod and of creating the additional veths
+to link the frr pod to the default namespace.
+
+![](images/routerkind-pods.png)
 
 
 ## How to start
@@ -40,8 +45,15 @@ For example, in the [leaf1 setup configuration file](./leaf1/setup.sh) we:
 The [kind](./kind) subfolder contains the configuration scripts for:
 
 - Setting up the kind node via the [setup.sh](./kind/setup.sh) file
-- Setting up the FRR container running in the node under [kind/frr](.kind/frr)
 - Setting up FRR-K8s under [kind/frr-k8s](./kind/frr-k8s/)
+
+### The new pods
+
+The way the pods (both the controller and the new frr one) configure themselves is quite artigianal, but sufficient to demonstrate
+it's possible to run this setup under pods.
+
+The two pods definitions can be found under [./frrpods](./frrpods), each with its own Dockerfile and a setup.sh file 
+that is used to perform the tasks.
 
 ## Validating
 
