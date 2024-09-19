@@ -29,5 +29,9 @@ kind load docker-image quay.io/metallb/frr-k8s:main --name k0
 docker cp kind/setup.sh k0-control-plane:/setup.sh
 docker cp kind/frr k0-control-plane:/frr
 docker exec k0-control-plane /setup.sh
+docker exec clab-kind-leaf2 /setup.sh
+docker exec clab-kind-leaf1 /setup.sh
+docker exec clab-kind-spine /setup.sh
+docker exec clab-kind-HOST1 /setup.sh
 
 kind/frr-k8s/setup.sh
