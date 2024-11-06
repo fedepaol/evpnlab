@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: frrtest
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: controller
+  namespace: frrtest
+spec:
+  containers:
+    - name: client
+      image: controller:dev
+      command: ["/bin/sh", "-c"]
+      args:
+        ["sleep INF"]
+      securityContext:
+        capabilities:
+          add: ["NET_ADMIN", "NET_RAW", "SYS_ADMIN", "NET_BIND_SERVICE"]
+        privileged: true
+      volumeMounts:
+      - mountPath: /run/containerd/containerd.sock
+        name: varrun
+        subPath: containerd.sock
+      - mountPath: /run/netns
+        name: runns
+        mountPropagation: HostToContainer
+  volumes:
+  - name: runns
+    hostPath:
+      path: /run/netns
+  - name: varrun
+    hostPath:
+      path: /run/containerd
+  hostNetwork: true
+  hostPID: true
+
