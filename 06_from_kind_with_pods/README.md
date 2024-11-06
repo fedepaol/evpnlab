@@ -49,7 +49,7 @@ The [kind](./kind) subfolder contains the configuration scripts for:
 
 ### The new pods
 
-The way the pods (both the controller and the new frr one) configure themselves is quite artigianal, but sufficient to demonstrate
+The way the pods (both the controller and the new frr one) configure themselves is quite rough, but sufficient to demonstrate
 it's possible to run this setup under pods.
 
 The two pods definitions can be found under [./frrpods](./frrpods), each with its own Dockerfile and a setup.sh file 
