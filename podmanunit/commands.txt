@@ -1,0 +1,4 @@
+ip netns identify 1874
+ip netns exec netns-3201e4a6-4e17-dde7-e49a-2e4336188cbf ip l
+
+nc -l -p 7080 | head -n 0

@@ -1,0 +1,80 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.3.1
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    io.kubernetes.cri-o.ContainerType/frr: container
+    io.kubernetes.cri-o.ContainerType/reloader: container
+    io.kubernetes.cri-o.SandboxID/frr: 93480373ef3382f847e1b80a92c47250a089e22cb22da5fc2de440c0dedefee
+    io.kubernetes.cri-o.SandboxID/reloader: 93480373ef3382f847e1b80a92c47250a089e22cb22da5fc2de440c0dedefee
+    io.kubernetes.cri-o.TTY/frr: "true"
+    io.kubernetes.cri-o.TTY/reloader: "true"
+    io.podman.annotations.autoremove/frr: "FALSE"
+    io.podman.annotations.autoremove/reloader: "FALSE"
+    io.podman.annotations.init/frr: "FALSE"
+    io.podman.annotations.init/reloader: "FALSE"
+    io.podman.annotations.privileged/frr: "FALSE"
+    io.podman.annotations.privileged/reloader: "FALSE"
+    io.podman.annotations.publish-all/frr: "FALSE"
+    io.podman.annotations.publish-all/reloader: "FALSE"
+  creationTimestamp: "2024-10-21T15:28:19Z"
+  labels:
+    app: frrpod
+  name: frrpod
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - args:
+    - /etc/frr/start.sh
+    image: quay.io/frrouting/frr:9.1.0
+    name: frr
+    resources: {}
+    securityContext:
+      capabilities:
+        add:
+        - CAP_NET_ADMIN
+        - CAP_SYS_ADMIN
+        drop:
+        - CAP_MKNOD
+        - CAP_AUDIT_WRITE
+    tty: true
+    volumeMounts:
+    - mountPath: /etc/frr
+      name: root-frr-host-0
+    - mountPath: /var/run/frr
+      name: varfrr-pvc
+  - args:
+    - sleep
+    - inf
+    image: quay.io/frrouting/frr:9.1.0
+    name: reloader
+    resources: {}
+    securityContext:
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+    tty: true
+    volumeMounts:
+    - mountPath: /etc/frr
+      name: root-frr-host-0
+    - mountPath: /var/run/frr
+      name: varfrr-pvc
+  enableServiceLinks: false
+  hostname: frrpod
+  restartPolicy: Never
+  shareProcessNamespace: true
+  volumes:
+  - hostPath:
+      path: /root/frr
+      type: Directory
+    name: root-frr-host-0
+  - name: varfrr-pvc
+    persistentVolumeClaim:
+      claimName: varfrr
+status: {}
+
