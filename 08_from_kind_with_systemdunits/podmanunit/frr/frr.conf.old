@@ -1,0 +1,19 @@
+log file /tmp/frr.log debug
+
+debug zebra events
+debug zebra vxlan
+debug bgp zebra
+debug zebra events
+debug zebra nht
+debug zebra kernel
+debug zebra rib
+debug zebra nexthop
+debug bgp neighbor-events
+debug bgp updates
+debug bgp keepalives
+debug bgp nht
+debug bgp zebra
+debug bfd network
+debug bfd peer
+debug bfd zebra
+

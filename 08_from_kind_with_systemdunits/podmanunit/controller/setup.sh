@@ -5,7 +5,7 @@ FRRPID=$(cat /etc/frr/frrpid)
 NETNS=$(ip netns identify $FRRPID)
 
 #emulate changing the config
-cp /etc/controller/frr.conf /etc/frr/
+#cp /etc/controller/frr.conf /etc/frr/
 
 ip link add frr0 type veth peer name frr1
 ip link set frr0 up
@@ -43,4 +43,4 @@ sleep 2s
 ip addr add dev frr0 192.169.10.0/24
 
 # trigger the reloader
-nc localhost 7080
+#nc localhost 7080

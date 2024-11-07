@@ -2,8 +2,8 @@
 set -x
 
 podman pod create --share=+pid --name=frrpod -p 7080:7080 
-podman create --pod=frrpod --pidfile=/root/frr/frrpid --name=frr --cap-add=CAP_NET_BIND_SERVICE,CAP_NET_ADMIN,CAP_NET_RAW,CAP_SYS_ADMIN -v=/root/frr:/etc/frr -v=varfrr:/var/run/frr:Z -t quay.io/frrouting/frr:10.0.1 /etc/frr/start.sh
-podman create --pod=frrpod --name=reloader -v=/root/frr:/etc/frr -v=varfrr:/var/run/frr:Z --entrypoint=/etc/frr/reloader.sh -t quay.io/frrouting/frr:10.0.1 
+podman create --pod=frrpod --pidfile=/root/frr/frrpid --name=frr --cap-add=CAP_NET_BIND_SERVICE,CAP_NET_ADMIN,CAP_NET_RAW,CAP_SYS_ADMIN -v=/root/frr:/etc/frr -v=varfrr:/var/run/frr:Z -t quay.io/frrouting/frr:master /etc/frr/start.sh
+podman create --pod=frrpod --name=reloader -v=/root/frr:/etc/frr -v=varfrr:/var/run/frr:Z --entrypoint=/etc/frr/reloader.sh -t quay.io/frrouting/frr:master 
 podman generate systemd --new --files --name frrpod
 
 sleep 10s #hack to wait /run/ns to appear
@@ -20,3 +20,4 @@ systemctl start pod-controllerpod
 systemctl start pod-frrpod
 
 
+podman exec controller /etc/controller/setup.sh
