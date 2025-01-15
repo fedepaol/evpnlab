@@ -9,9 +9,9 @@ ip addr add 100.65.0.2/32 dev lo
 ip link add red type vrf table 1100
 
 # Leaf - host leg
-ip link set frr1 master red
-ip addr add dev frr1 192.169.10.1/24
-ip link set frr1 up
+ip link set frrns master red
+ip addr add dev frrns 192.169.10.1/24
+ip link set frrns up
 ip link set eth1 up
 
 ip link set red up
