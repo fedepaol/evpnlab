@@ -29,4 +29,4 @@ docker exec clab-kind-leaf1 /setup.sh
 docker exec clab-kind-spine /setup.sh
 docker exec clab-kind-HOST1 /setup.sh
 
-kind/frr-k8s/setup.sh
+kind/metallb/setup.sh

@@ -16,4 +16,5 @@ sleep 2s
 
 ip addr add dev frrhost 192.169.10.0/24
 
+ip route add 192.168.10.1/32 via 192.169.10.1 # STATIC ROUTE REQUIRED TO REACH HOST1
 docker exec frr /etc/frr/setup.sh
