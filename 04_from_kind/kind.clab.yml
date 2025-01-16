@@ -3,7 +3,7 @@ topology:
   nodes:
     leaf1:
       kind: linux
-      image: quay.io/frrouting/frr:9.0.0
+      image: quay.io/frrouting/frr:10.2.0
       binds:
         - leaf1/daemons:/etc/frr/daemons
         - leaf1/frr.conf:/etc/frr/frr.conf
@@ -11,7 +11,7 @@ topology:
         - leaf1/setup.sh:/setup.sh
     leaf2:
       kind: linux
-      image: quay.io/frrouting/frr:9.0.0
+      image: quay.io/frrouting/frr:10.2.0
       binds:
         - leaf2/daemons:/etc/frr/daemons
         - leaf2/vtysh.conf:/etc/frr/vtysh.conf
@@ -19,7 +19,7 @@ topology:
         - leaf2/setup.sh:/setup.sh
     spine:
       kind: linux
-      image: quay.io/frrouting/frr:9.0.0
+      image: quay.io/frrouting/frr:10.2.0
       binds:
         - spine/daemons:/etc/frr/daemons
         - spine/vtysh.conf:/etc/frr/vtysh.conf
