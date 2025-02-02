@@ -5,13 +5,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 192.168.8.0/24
----
-apiVersion: metallb.io/v1beta1
-kind: BGPAdvertisement
-metadata:
-  name: empty
-  namespace: metallb-system
+  - 192.170.8.0/24
 ---
 apiVersion: metallb.io/v1beta2
 kind: BGPPeer
@@ -22,37 +16,3 @@ spec:
   myASN: 64515
   peerASN: 64512
   peerAddress: 192.169.10.1
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: httpd
-spec:
-  selector:
-    matchLabels:
-      app: httpd
-  template:
-    metadata:
-      labels:
-        app: httpd
-    spec:
-      containers:
-      - name: httpd
-        image: quay.io/fedora/httpd-24:latest
-        ports:
-        - name: http
-          containerPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: httpd
-spec:
-  ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: 8080
-  selector:
-    app: httpd
-  type: LoadBalancer
