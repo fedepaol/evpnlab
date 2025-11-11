@@ -1,0 +1,80 @@
+name: evpnl3
+
+topology:
+  nodes:
+    borderleaf:
+      kind: linux
+      image: quay.io/frrouting/frr:10.4.1
+      binds:
+        - borderleaf/:/etc/frr/
+        - borderleaf/setup.sh:/setup.sh
+    storageleaf:
+      kind: linux
+      image: quay.io/frrouting/frr:10.4.1
+      binds:
+        - storageleaf/:/etc/frr/
+        - storageleaf/setup.sh:/setup.sh
+    leaf1:
+      kind: linux
+      image: quay.io/frrouting/frr:10.4.1
+      binds:
+        - leaf1/:/etc/frr/
+        - leaf1/setup.sh:/setup.sh
+    leaf2:
+      kind: linux
+      image: quay.io/frrouting/frr:10.4.1
+      binds:
+        - leaf2/:/etc/frr/
+        - leaf2/setup.sh:/setup.sh
+    spine:
+      kind: linux
+      image: quay.io/frrouting/frr:10.4.1
+      binds:
+        - spine/:/etc/frr/
+        - spine/setup.sh:/setup.sh
+
+    SERVER1:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - server1/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+    SERVER2:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - server2/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+    SERVER3:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - server3/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+    STORAGE:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - storage/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+    INTERNET:
+      kind: linux
+      image: praqma/network-multitool:latest
+      binds:
+        - internet/setup.sh:/setup.sh
+      cmd: bash /setup.sh
+
+  links:
+    - endpoints: ["STORAGE:eth1", "storageleaf:eth1"]
+    - endpoints: ["storageleaf:tospine", "spine:tostorageleaf"]
+    - endpoints: ["SERVER1:eth1", "leaf1:toserver1"]
+    - endpoints: ["leaf1:tospine", "spine:toleaf1"]
+    - endpoints: ["SERVER2:eth1", "leaf2:toserver2"]
+    - endpoints: ["SERVER3:eth1", "leaf2:toserver3"]
+    - endpoints: ["leaf2:tospine", "spine:toleaf2"]
+    - endpoints: ["borderleaf:tospine", "spine:toborderleaf"]
+    - endpoints: ["INTERNET:toborder", "borderleaf:tointernet"]
