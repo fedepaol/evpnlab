@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-ip addr add 100.65.0.2/32 dev lo
+ip addr add 100.64.0.2/32 dev lo
 
 # Leaf2 to spine
 ip addr add 10.0.0.5/31 dev tospine
@@ -14,8 +14,8 @@ ip addr add 10.1.0.4/31 dev toserver3
 
 ip link add br100 type bridge
 ip link set br100 master red addrgenmode none
-ip link set br100 addr aa:bb:cc:00:00:64
-ip link add vni100 type vxlan local 100.65.0.2 dstport 4789 id 100 nolearning
+ip link set br100 addr aa:bb:cc:00:00:02
+ip link add vni100 type vxlan local 100.64.0.2 dstport 4789 id 100 nolearning
 ip link set vni100 master br100 addrgenmode none
 ip link set vni100 type bridge_slave neigh_suppress on learning off
 ip link set vni100 up
@@ -27,8 +27,8 @@ ip addr add 10.1.0.2/31 dev toserver2
 
 ip link add br200 type bridge
 ip link set br200 master blue addrgenmode none
-ip link set br200 addr aa:bb:cc:00:00:64
-ip link add vni200 type vxlan local 100.65.0.2 dstport 4789 id 200 nolearning
+ip link set br200 addr aa:bb:cc:00:00:12
+ip link add vni200 type vxlan local 100.64.0.2 dstport 4789 id 200 nolearning
 ip link set vni200 master br100 addrgenmode none
 ip link set vni200 type bridge_slave neigh_suppress on learning off
 ip link set vni200 up

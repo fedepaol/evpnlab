@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-ip addr add 100.65.0.2/32 dev lo
+ip addr add 100.64.0.4/32 dev lo
 
 # Borderleaf to spine
 ip addr add 10.0.0.7/31 dev tospine
@@ -12,8 +12,8 @@ ip link set red up
 
 ip link add br100 type bridge
 ip link set br100 master red addrgenmode none
-ip link set br100 addr aa:bb:cc:00:00:64
-ip link add vni100 type vxlan local 100.65.0.2 dstport 4789 id 100 nolearning
+ip link set br100 addr aa:bb:cc:00:00:04
+ip link add vni100 type vxlan local 100.64.0.4 dstport 4789 id 100 nolearning
 ip link set vni100 master br100 addrgenmode none
 ip link set vni100 type bridge_slave neigh_suppress on learning off
 ip link set vni100 up
@@ -23,8 +23,8 @@ ip link add blue type vrf table 1200
 
 ip link add br200 type bridge
 ip link set br200 master blue addrgenmode none
-ip link set br200 addr aa:bb:cc:00:00:64
-ip link add vni200 type vxlan local 100.65.0.2 dstport 4789 id 200 nolearning
+ip link set br200 addr aa:bb:cc:00:00:14
+ip link add vni200 type vxlan local 100.64.0.4 dstport 4789 id 200 nolearning
 ip link set vni200 master br100 addrgenmode none
 ip link set vni200 type bridge_slave neigh_suppress on learning off
 ip link set vni200 up
