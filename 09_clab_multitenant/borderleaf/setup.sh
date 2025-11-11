@@ -2,14 +2,16 @@
 #
 
 ip addr add 100.65.0.2/32 dev lo
-ip addr add 192.168.1.3/24 dev eth1
+
+# Borderleaf to spine
+ip addr add 10.0.0.7/31 dev tospine
 
 
 ip link add red type vrf table 1100
 ip link set red up
 
-ip link set eth2 master red
-ip addr add 192.168.11.2/24 dev eth2
+ip link set tointernet master red
+ip addr add 10.1.0.8/31 dev tointernet
 
 ip link add br100 type bridge
 ip link set br100 master red addrgenmode none

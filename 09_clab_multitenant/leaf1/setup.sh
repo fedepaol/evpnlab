@@ -5,14 +5,14 @@
 ip addr add 100.64.0.1/32 dev lo
 
 # Leaf - spine leg
-ip addr add 192.168.1.1/24 dev eth1
+ip addr add 10.0.0.3/31 dev tospine
 
 # L3 VRF
 ip link add red type vrf table 1100
 
 # Leaf - host leg
-ip link set eth2 master red
-ip addr add 192.168.10.2/24 dev eth2
+ip link set toserver1 master red
+ip addr add 10.1.0.0/31 dev toserver1
 
 ip link set red up
 ip link add br100 type bridge

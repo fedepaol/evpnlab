@@ -1,0 +1,18 @@
+ Spine-to-Leaf Links (spine/setup.sh):
+  - tostorageleaf: 10.0.0.0/31
+  - toleaf1: 10.0.0.2/31
+  - toleaf2: 10.0.0.4/31
+  - toborderleaf: 10.0.0.6/31
+
+  Leaf Nodes:
+  - storageleaf: tospine 10.0.0.1/31, eth1 (to STORAGE) 10.1.0.6/31
+  - leaf1: tospine 10.0.0.3/31, toserver1 10.1.0.0/31
+  - leaf2: tospine 10.0.0.5/31, toserver2 10.1.0.2/31, toserver3 10.1.0.4/31
+  - borderleaf: tospine 10.0.0.7/31, tointernet 10.1.0.8/31
+
+  Server Nodes:
+  - SERVER1: eth1 10.1.0.1/31 (gateway 10.1.0.0)
+  - SERVER2: eth1 10.1.0.3/31 (gateway 10.1.0.2)
+  - SERVER3: eth1 10.1.0.5/31 (gateway 10.1.0.4)
+  - STORAGE: eth1 10.1.0.7/31 (gateway 10.1.0.6)
+  - INTERNET: toborder 10.1.0.9/31 (gateway 10.1.0.8)
