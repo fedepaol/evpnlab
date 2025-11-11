@@ -37,35 +37,35 @@ topology:
       kind: linux
       image: praqma/network-multitool:latest
       binds:
-        - server1/setup.sh:/setup.sh
+        - SERVER1/setup.sh:/setup.sh
       cmd: bash /setup.sh
 
     SERVER2:
       kind: linux
       image: praqma/network-multitool:latest
       binds:
-        - server2/setup.sh:/setup.sh
+        - SERVER2/setup.sh:/setup.sh
       cmd: bash /setup.sh
 
     SERVER3:
       kind: linux
       image: praqma/network-multitool:latest
       binds:
-        - server3/setup.sh:/setup.sh
+        - SERVER3/setup.sh:/setup.sh
       cmd: bash /setup.sh
 
     STORAGE:
       kind: linux
       image: praqma/network-multitool:latest
       binds:
-        - storage/setup.sh:/setup.sh
+        - STORAGE/setup.sh:/setup.sh
       cmd: bash /setup.sh
 
     INTERNET:
       kind: linux
       image: praqma/network-multitool:latest
       binds:
-        - internet/setup.sh:/setup.sh
+        - INTERNET/setup.sh:/setup.sh
       cmd: bash /setup.sh
 
   links:
