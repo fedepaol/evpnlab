@@ -11,8 +11,6 @@ ip addr add 10.1.0.6/31 dev tostorage
 ip link add red type vrf table 1100
 ip link set red up
 
-ip link set tostorage master red
-
 ip link add br100 type bridge
 ip link set br100 master red addrgenmode none
 ip link set br100 addr aa:bb:cc:00:00:03
@@ -32,4 +30,18 @@ ip link set vni200 master br100 addrgenmode none
 ip link set vni200 type bridge_slave neigh_suppress on learning off
 ip link set vni200 up
 ip link set br200 up
+
+ip link add vrfstorage type vrf table 1300
+ip link set vrfstorage up
+
+ip link set tostorage master vrfstorage
+
+ip link add br300 type bridge
+ip link set br300 master vrfstorage addrgenmode none
+ip link set br300 addr aa:bb:cc:00:00:23
+ip link add vni300 type vxlan local 100.64.0.3 dstport 4789 id 300 nolearning
+ip link set vni300 master br300 addrgenmode none
+ip link set vni300 type bridge_slave neigh_suppress on learning off
+ip link set vni300 up
+ip link set br300 up
 
