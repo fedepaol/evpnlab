@@ -69,7 +69,7 @@ topology:
       cmd: bash /setup.sh
 
   links:
-    - endpoints: ["STORAGE:eth1", "storageleaf:eth1"]
+    - endpoints: ["STORAGE:eth1", "storageleaf:tostorage"]
     - endpoints: ["storageleaf:tospine", "spine:tostorageleaf"]
     - endpoints: ["SERVER1:eth1", "leaf1:toserver1"]
     - endpoints: ["leaf1:tospine", "spine:toleaf1"]
