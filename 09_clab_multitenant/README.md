@@ -1,92 +1,99 @@
-# Topology
+# EVPN Multitenancy Lab
 
-The idea of this lab is to have a spine - leaves topology where the two hosts are connected to two different leaves
-via a L3 connection.
+This lab demonstrates a multitenancy EVPN/VXLan deployment with tenant isolation, shared storage access, and common internet connectivity.
 
+![Network Topology](multitenancy.png)
 
-```raw
-                     ┌─────────┐
-                     │         │
-                     │  64612  │
-                     │         │
-                     └────┬────┘
-                          │
-                          │
-                  ┌───────┴────────┐
-                  │                │
-             ┌────┴────┐      ┌────┴────┐
-             │         │      │         │
-             │  64512  │      │  64512  │
-             │         │      │         │
-             └────┬────┘      └────┬────┘
-192.168.10.0/24   │                │ L3     192.168.11.0/24
-             ┌────┴────┐      ┌────┴────┐
-             │         │      │         │
-             │  Host1  │      │  Host2  │
-             │         │      │         │
-             └─────────┘      └─────────┘
+## Overview
+
+The lab implements a spine-leaf architecture with EVPN/VXLan overlay to support multiple isolated tenants while providing:
+
+- **Tenant Isolation**: Red and blue VRFs are completely isolated from each other
+- **Shared Storage**: All tenants can access a common storage service via the Storage Leaf
+- **Internet Access**: Common internet connectivity through the Border Leaf
+
+## Topology
+
+The topology consists of:
+
+- **Spine**: Core router providing underlay connectivity (AS 64612)
+- **Leaf 1**: Access switch for Server 1 (red tenant)
+- **Leaf 2**: Access switch for Server 2 (blue tenant) and Server 3 (red tenant)
+- **Storage Leaf**: Provides shared storage access for Server 4
+- **Border Leaf**: Gateway to the internet
+- **Servers**:
+  - Server 1 (red tenant) - connected to Leaf 1
+  - Server 2 (blue tenant) - connected to Leaf 2
+  - Server 3 (red tenant) - connected to Leaf 2
+  - Server 4 (green tenant) - storage server connected to Storage Leaf
+- **Internet**: External connectivity container
+
+## VRF Design
+
+### Red VRF
+- Server 1 (Leaf 1)
+- Server 3 (Leaf 2)
+- Isolated from blue VRF
+- Access to shared storage
+- Access to internet via Border Leaf
+
+### Blue VRF
+- Server 2 (Leaf 2)
+- Isolated from red VRF
+- Access to shared storage
+- Access to internet via Border Leaf
+
+### Storage VRF (Green)
+- Server 4 (Storage Leaf)
+- Accessible from both red and blue VRFs
+- Implements shared storage service
+
+## EVPN/VXLan Implementation
+
+The lab uses:
+- **L3 EVPN**: Type 5 routes for inter-subnet routing
+- **VXLan Tunnels**: Overlay network between VTEPs
+- **VRF Route Leaking**: Controlled route import/export between VRFs for storage and internet access
+- **BGP EVPN**: Control plane using BGP with EVPN address family
+
+Each leaf acts as a VTEP (VXLan Tunnel Endpoint) and exchanges EVPN routes with the spine to:
+- Learn remote MAC/IP bindings
+- Establish VXLan tunnels
+- Maintain tenant isolation through VRF separation
+
+## How to Start
+
+The lab leverages [containerlab](https://containerlab.dev/). The containerlab file contains the definition of the FRR containers and server containers, plus their interconnections.
+
+A convenience script is provided to start the lab and execute the various setup commands inside the containers:
+
+```bash
+./setup.sh
 ```
 
+## Configuration Structure
 
-We want to connect the two hosts via a VXLan tunnel using L3Evpn routes.
+Each device subfolder contains:
+- **frr.conf**: FRR routing configuration (BGP, EVPN)
+- **setup.sh**: Interface configuration, VRF setup, VXLan tunnel creation
 
-```raw
+For example, in the leaf configurations we:
+- Assign VTEP IP addresses to loopback interfaces
+- Configure VRFs for tenant isolation
+- Create VXLan interfaces with appropriate VNIs
+- Configure BGP EVPN with route-targets for VRF isolation
+- Set up route leaking for storage and internet access
 
+## Key Features
 
-                  ┌─────────┐              ┌─────────┐
-                  │         │              │         │
-                  │  64512  │     VXLan    │  64512  │
-                  │       ┌─┼──────────────┼─┐       │
-                  └────┬──┴─┘              └─┴──┬────┘
-     192.168.10.0/24   │                        │ L3     192.168.11.0/24
-                  ┌────┴────┐              ┌────┴────┐
-                  │         │              │         │
-                  │  Host1  │              │  Host2  │
-                  │         │              │         │
-                  └─────────┘              └─────────┘
-```
+### Tenant Isolation
+Each VRF uses unique route-targets to ensure complete isolation:
+- Red VRF: RT 65000:100
+- Blue VRF: RT 65000:200
+- Storage access via selective route import/export
 
-## How to start
+### Shared Services
+- Storage VRF routes are selectively imported into tenant VRFs
+- Internet routes are imported from Border Leaf VRF
+- Traffic remains isolated between red and blue tenants
 
-The lab leverages [containerlab](https://containerlab.dev/). The [clab file](./direct.clab.yaml) contains the definition
-of the FRR containers and of the two "host" containers, plus how they are connected together.
-
-A convenience [setup.sh](./setup.sh) script is provided, to start the lab and execute the various setup commands inside the containers.
-
-
-## The configuration
-
-Each subfolder contains the frr configuration file related to the corresponding container, plus a setup.sh script used to assign IPs and
-to create the VXLan and what FRR needs to make EVPN work.
-
-For example, in the [leaf1 setup configuration file](./leaf1/setup.sh) we:
-
-- assign the VTEP IP address to the loopback interface
-- Assign IPs to both the veth connecting the leaf to the spine and the one connecting the "HOST" to the leaf
-- Create a linux VRF corresponding to the L3 VRF and enslave the veth leg connected to the "HOST"
-- Create all the machinery to make the EVPN / VXLan tunnel work, including a linux bridge and a VXLan interface
-
-
-## Validating
-
-Pinging HOST2 from HOST1 should work:
-
-```
-# docker exec clab-evpnl3-HOST1 /bin/bash -c "ping 192.168.11.1"
-PING 192.168.11.1 (192.168.11.1) 56(84) bytes of data.
-64 bytes from 192.168.11.1: icmp_seq=1 ttl=62 time=0.321 ms
-64 bytes from 192.168.11.1: icmp_seq=2 ttl=62 time=0.198 ms
-```
-
-It works! Also, let's make sure it's working through a vxlan tunnel:
-
-```raw
-sudo ip netns exec clab-evpnl3-leaf1 tcpdump -nn -i eth1
-dropped privs to tcpdump
-tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
-listening on eth1, link-type EN10MB (Ethernet), snapshot length 262144 bytes
-12:01:51.759318 IP 100.64.0.1.48561 > 100.65.0.2.4789: VXLAN, flags [I] (0x08), vni 100
-IP 192.168.10.1 > 192.168.11.1: ICMP echo request, id 5, seq 1, length 64
-12:01:51.759433 IP 100.65.0.2.48561 > 100.64.0.1.4789: VXLAN, flags [I] (0x08), vni 100
-IP 192.168.11.1 > 192.168.10.1: ICMP echo reply, id 5, seq 1, length 64
-```
