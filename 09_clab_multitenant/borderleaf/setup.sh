@@ -20,14 +20,28 @@ ip link set vni100 up
 ip link set br100 up
 
 ip link add blue type vrf table 1200
+ip link set blue up
 
 ip link add br200 type bridge
 ip link set br200 master blue addrgenmode none
 ip link set br200 addr aa:bb:cc:00:00:14
 ip link add vni200 type vxlan local 100.64.0.4 dstport 4789 id 200 nolearning
-ip link set vni200 master br100 addrgenmode none
+ip link set vni200 master br200 addrgenmode none
 ip link set vni200 type bridge_slave neigh_suppress on learning off
 ip link set vni200 up
 ip link set br200 up
 
+ip link add external type vrf table 1400
+ip link set external up
+
+ip link set tointernet master external
 ip addr add 10.1.0.8/31 dev tointernet
+
+ip link add br400 type bridge
+ip link set br400 master external addrgenmode none
+ip link set br400 addr aa:bb:cc:00:00:24
+ip link add vni400 type vxlan local 100.64.0.4 dstport 4789 id 400 nolearning
+ip link set vni400 master br400 addrgenmode none
+ip link set vni400 type bridge_slave neigh_suppress on learning off
+ip link set vni400 up
+ip link set br400 up

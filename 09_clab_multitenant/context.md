@@ -1,4 +1,9 @@
-multitenant.clab.yml contians a containerlab definition (https://containerlab.dev/)
-Each node runs a setup.sh script.
+Borderleaf is the access to the internet.
 
-Adjust the setup.sh script to have a /31 ip on each interface so it makes sense. Also, change to the right interface name.
+- Please configure it to add a "external". 
+- Put the tointernet interface in that vrf
+- Change the configuration so that the default route is towards the ip of the "internet" container
+- Leak routes from external to red / blue and viceversa
+- Add the "external" vrf to leaf1 / leaf2
+
+We must be abple to ping 8.8.8.9 from each server

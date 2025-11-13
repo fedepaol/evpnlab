@@ -144,9 +144,26 @@ docker exec -it clab-evpnl3-SERVER2 ping -c 3 10.1.0.7
 
 Expected result: **SUCCESS** - Ping should work, confirming storage is accessible from blue VRF too.
 
+### Test 5: Verify Internet Connectivity
+All servers should be able to access the internet (8.8.8.9) through the Border Leaf:
+
+```bash
+# From Server 1 (red VRF) to Internet
+docker exec -it clab-evpnl3-SERVER1 ping -c 3 8.8.8.9
+
+# From Server 2 (blue VRF) to Internet
+docker exec -it clab-evpnl3-SERVER2 ping -c 3 8.8.8.9
+
+# From Server 3 (red VRF) to Internet
+docker exec -it clab-evpnl3-SERVER3 ping -c 3 8.8.8.9
+```
+
+Expected result: **SUCCESS** - All pings should work, confirming internet access from both red and blue VRFs.
+
 ### Summary
 These tests confirm:
 - ✓ Servers within the same VRF can communicate
 - ✓ Servers in different VRFs are isolated from each other
 - ✓ All VRFs can access the shared storage service
+- ✓ All VRFs have internet connectivity through the Border Leaf
 
