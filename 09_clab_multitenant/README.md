@@ -97,3 +97,56 @@ Each VRF uses unique route-targets to ensure complete isolation:
 - Internet routes are imported from Border Leaf VRF
 - Traffic remains isolated between red and blue tenants
 
+## Verification
+
+After starting the lab, you can verify the multitenancy isolation and shared storage access with the following tests:
+
+### Test 1: Verify Red VRF Connectivity
+Servers in the same VRF (red) should be able to communicate:
+
+```bash
+# From Server 1 (red VRF) to Server 3 (red VRF)
+docker exec -it clab-evpnl3-SERVER1 ping -c 3 10.1.0.5
+```
+
+Expected result: **SUCCESS** - Ping should work between red VRF servers.
+
+### Test 2: Verify VRF Isolation
+Servers in different VRFs should NOT be able to communicate:
+
+```bash
+# From Server 1 (red VRF) to Server 2 (blue VRF)
+docker exec -it clab-evpnl3-SERVER1 ping -c 3 10.1.0.3
+```
+
+Expected result: **FAILURE** - Ping should fail, demonstrating VRF isolation.
+
+### Test 3: Verify Shared Storage Access from Red VRF
+Both red VRF servers should be able to reach the shared storage:
+
+```bash
+# From Server 1 (red VRF) to Storage
+docker exec -it clab-evpnl3-SERVER1 ping -c 3 10.1.0.7
+
+# From Server 3 (red VRF) to Storage
+docker exec -it clab-evpnl3-SERVER3 ping -c 3 10.1.0.7
+```
+
+Expected result: **SUCCESS** - Both pings should work, demonstrating shared storage access.
+
+### Test 4: Verify Shared Storage Access from Blue VRF
+The blue VRF server should also be able to reach the shared storage:
+
+```bash
+# From Server 2 (blue VRF) to Storage
+docker exec -it clab-evpnl3-SERVER2 ping -c 3 10.1.0.7
+```
+
+Expected result: **SUCCESS** - Ping should work, confirming storage is accessible from blue VRF too.
+
+### Summary
+These tests confirm:
+- ✓ Servers within the same VRF can communicate
+- ✓ Servers in different VRFs are isolated from each other
+- ✓ All VRFs can access the shared storage service
+
