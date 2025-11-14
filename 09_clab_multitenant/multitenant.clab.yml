@@ -11,13 +11,15 @@ topology:
         - borderleaf/:/etc/frr/
         - borderleaf/setup.sh:/setup.sh
     storageleaf:
-      kind: linux
-      image: quay.io/frrouting/frr:10.4.1
-      cpu: 0.5
-      memory: 512m
+      kind: cumulus_cvx
+      image: networkop/cx:5.3.0
+      runtime: docker
+      cpu: 1.5
+      memory: 2g
       binds:
-        - storageleaf/:/etc/frr/
-        - storageleaf/setup.sh:/setup.sh
+        - storageleaf/interfaces:/etc/network/interfaces
+        - storageleaf/frr.conf:/etc/frr/frr.conf
+        - storageleaf/daemons:/etc/frr/daemons
     leaf1:
       kind: cumulus_cvx
       image: networkop/cx:5.3.0
@@ -93,8 +95,8 @@ topology:
       cmd: bash /setup.sh
 
   links:
-    - endpoints: ["STORAGE:eth1", "storageleaf:tostorage"]
-    - endpoints: ["storageleaf:tospine", "spine:tostorageleaf"]
+    - endpoints: ["STORAGE:eth1", "storageleaf:swp1"]
+    - endpoints: ["storageleaf:swp2", "spine:tostorageleaf"]
     - endpoints: ["SERVER1:eth1", "leaf1:swp1"]
     - endpoints: ["leaf1:swp2", "spine:toleaf1"]
     - endpoints: ["SERVER2:eth1", "leaf2:swp1"]
