@@ -29,13 +29,15 @@ topology:
         - leaf1/frr.conf:/etc/frr/frr.conf
         - leaf1/daemons:/etc/frr/daemons
     leaf2:
-      kind: linux
-      image: quay.io/frrouting/frr:10.4.1
-      cpu: 0.5
-      memory: 512m
+      kind: cumulus_cvx
+      image: networkop/cx:5.3.0
+      runtime: docker
+      cpu: 1.5
+      memory: 2g
       binds:
-        - leaf2/:/etc/frr/
-        - leaf2/setup.sh:/setup.sh
+        - leaf2/interfaces:/etc/network/interfaces
+        - leaf2/frr.conf:/etc/frr/frr.conf
+        - leaf2/daemons:/etc/frr/daemons
     spine:
       kind: linux
       image: quay.io/frrouting/frr:10.4.1
@@ -95,8 +97,8 @@ topology:
     - endpoints: ["storageleaf:tospine", "spine:tostorageleaf"]
     - endpoints: ["SERVER1:eth1", "leaf1:swp1"]
     - endpoints: ["leaf1:swp2", "spine:toleaf1"]
-    - endpoints: ["SERVER2:eth1", "leaf2:toserver2"]
-    - endpoints: ["SERVER3:eth1", "leaf2:toserver3"]
-    - endpoints: ["leaf2:tospine", "spine:toleaf2"]
+    - endpoints: ["SERVER2:eth1", "leaf2:swp1"]
+    - endpoints: ["SERVER3:eth1", "leaf2:swp2"]
+    - endpoints: ["leaf2:swp3", "spine:toleaf2"]
     - endpoints: ["borderleaf:tospine", "spine:toborderleaf"]
     - endpoints: ["INTERNET:toborder", "borderleaf:tointernet"]
