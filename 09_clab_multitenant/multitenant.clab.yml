@@ -5,30 +5,42 @@ topology:
     borderleaf:
       kind: linux
       image: quay.io/frrouting/frr:10.4.1
+      cpu: 0.5
+      memory: 512m
       binds:
         - borderleaf/:/etc/frr/
         - borderleaf/setup.sh:/setup.sh
     storageleaf:
       kind: linux
       image: quay.io/frrouting/frr:10.4.1
+      cpu: 0.5
+      memory: 512m
       binds:
         - storageleaf/:/etc/frr/
         - storageleaf/setup.sh:/setup.sh
     leaf1:
-      kind: linux
-      image: quay.io/frrouting/frr:10.4.1
+      kind: cumulus_cvx
+      image: networkop/cx:5.3.0
+      runtime: docker
+      cpu: 1.5
+      memory: 2g
       binds:
-        - leaf1/:/etc/frr/
-        - leaf1/setup.sh:/setup.sh
+        - leaf1/interfaces:/etc/network/interfaces
+        - leaf1/frr.conf:/etc/frr/frr.conf
+        - leaf1/daemons:/etc/frr/daemons
     leaf2:
       kind: linux
       image: quay.io/frrouting/frr:10.4.1
+      cpu: 0.5
+      memory: 512m
       binds:
         - leaf2/:/etc/frr/
         - leaf2/setup.sh:/setup.sh
     spine:
       kind: linux
       image: quay.io/frrouting/frr:10.4.1
+      cpu: 0.5
+      memory: 512m
       binds:
         - spine/:/etc/frr/
         - spine/setup.sh:/setup.sh
@@ -36,6 +48,8 @@ topology:
     SERVER1:
       kind: linux
       image: praqma/network-multitool:latest
+      cpu: 0.25
+      memory: 256m
       binds:
         - SERVER1/setup.sh:/setup.sh
       cmd: bash /setup.sh
@@ -43,6 +57,8 @@ topology:
     SERVER2:
       kind: linux
       image: praqma/network-multitool:latest
+      cpu: 0.25
+      memory: 256m
       binds:
         - SERVER2/setup.sh:/setup.sh
       cmd: bash /setup.sh
@@ -50,6 +66,8 @@ topology:
     SERVER3:
       kind: linux
       image: praqma/network-multitool:latest
+      cpu: 0.25
+      memory: 256m
       binds:
         - SERVER3/setup.sh:/setup.sh
       cmd: bash /setup.sh
@@ -57,6 +75,8 @@ topology:
     STORAGE:
       kind: linux
       image: praqma/network-multitool:latest
+      cpu: 0.25
+      memory: 256m
       binds:
         - STORAGE/setup.sh:/setup.sh
       cmd: bash /setup.sh
@@ -64,6 +84,8 @@ topology:
     INTERNET:
       kind: linux
       image: praqma/network-multitool:latest
+      cpu: 0.25
+      memory: 256m
       binds:
         - INTERNET/setup.sh:/setup.sh
       cmd: bash /setup.sh
@@ -71,8 +93,8 @@ topology:
   links:
     - endpoints: ["STORAGE:eth1", "storageleaf:tostorage"]
     - endpoints: ["storageleaf:tospine", "spine:tostorageleaf"]
-    - endpoints: ["SERVER1:eth1", "leaf1:toserver1"]
-    - endpoints: ["leaf1:tospine", "spine:toleaf1"]
+    - endpoints: ["SERVER1:eth1", "leaf1:swp1"]
+    - endpoints: ["leaf1:swp2", "spine:toleaf1"]
     - endpoints: ["SERVER2:eth1", "leaf2:toserver2"]
     - endpoints: ["SERVER3:eth1", "leaf2:toserver3"]
     - endpoints: ["leaf2:tospine", "spine:toleaf2"]
