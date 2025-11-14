@@ -1,0 +1,84 @@
+# The loopback network interface
+auto lo
+iface lo inet loopback
+    address 100.64.0.4/32
+
+# Management interface
+auto eth0
+iface eth0 inet dhcp
+    vrf mgmt
+
+auto mgmt
+iface mgmt
+    vrf-table auto
+
+# Spine-facing interface
+auto swp1
+iface swp1
+    address 10.0.0.7/31
+
+# VRF red configuration
+auto red
+iface red
+    vrf-table 1100
+
+# Bridge and VXLAN for VNI 100 (VRF red)
+auto br100
+iface br100
+    bridge-ports vni100
+    vrf red
+    hwaddress aa:bb:cc:00:00:04
+
+auto vni100
+iface vni100
+    bridge-access 100
+    vxlan-id 100
+    vxlan-local-tunnelip 100.64.0.4
+    bridge-learning off
+    bridge-arp-nd-suppress on
+
+# VRF blue configuration
+auto blue
+iface blue
+    vrf-table 1200
+
+# Bridge and VXLAN for VNI 200 (VRF blue)
+auto br200
+iface br200
+    bridge-ports vni200
+    vrf blue
+    hwaddress aa:bb:cc:00:00:14
+
+auto vni200
+iface vni200
+    bridge-access 200
+    vxlan-id 200
+    vxlan-local-tunnelip 100.64.0.4
+    bridge-learning off
+    bridge-arp-nd-suppress on
+
+# VRF external configuration
+auto external
+iface external
+    vrf-table 1004
+
+# Internet-facing interface in VRF external
+auto swp2
+iface swp2
+    vrf external
+    address 10.1.0.8/31
+
+# Bridge and VXLAN for VNI 400 (VRF external)
+auto br400
+iface br400
+    bridge-ports vni400
+    vrf external
+    hwaddress aa:bb:cc:00:00:24
+
+auto vni400
+iface vni400
+    bridge-access 400
+    vxlan-id 400
+    vxlan-local-tunnelip 100.64.0.4
+    bridge-learning off
+    bridge-arp-nd-suppress on
