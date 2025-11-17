@@ -9,7 +9,3 @@ chpasswd:
 
 # Configure SSH
 ssh_pwauth: True
-
-# Remove eth0 default route after boot
-runcmd:
-  - ip route del default via 192.168.122.1 dev eth0 || true
