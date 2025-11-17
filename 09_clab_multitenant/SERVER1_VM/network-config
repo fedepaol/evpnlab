@@ -1,9 +1,9 @@
 version: 2
 ethernets:
-  eth0:
+  ens2:
     addresses:
       - 192.168.122.100/24
-  eth1:
+  ens3:
     addresses:
       - 10.1.0.1/31
     routes:

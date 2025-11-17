@@ -18,8 +18,8 @@ This folder contains everything needed to create a Fedora VM that replaces the S
 ## Network Configuration
 
 The VM will have two network interfaces:
-- **eth0**: Connected to virbr0 (default libvirt bridge) - Management access via DHCP
-- **eth1**: Connected to SERVER1 (containerlab bridge) - IP: 10.1.0.1/31, Gateway: 10.1.0.0
+- **ens2**: Connected to virbr0 (default libvirt bridge) - Management access with static IP: 192.168.122.100/24
+- **ens3**: Connected to SERVER1 (containerlab bridge) - IP: 10.1.0.1/31, Gateway: 10.1.0.0
 
 ## Usage
 
@@ -43,7 +43,7 @@ The script will:
 - Download Fedora Cloud image (if not present)
 - Create a VM disk
 - Generate cloud-init ISO
-- Create the VM with two NICs (eth0 on virbr0, eth1 on containerlab bridge)
+- Create the VM with two NICs (ens2 on virbr0, ens3 on containerlab bridge)
 
 ### 3. Access the VM
 

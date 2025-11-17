@@ -2,8 +2,6 @@
 
 # Configuration
 VM_NAME="server1"
-CIRROS_VERSION="0.6.2"
-BASE_IMAGE="cirros-${CIRROS_VERSION}-x86_64-disk.img"
 VM_DISK="${VM_NAME}.qcow2"
 CIDATA_ISO="${VM_NAME}-cidata.iso"
 
@@ -27,7 +25,6 @@ fi
 # Clean up VM-specific files (keep base image for reuse)
 echo "Cleaning up VM files..."
 rm -f "$VM_DISK" "$CIDATA_ISO"
-echo "Keeping base image: $BASE_IMAGE"
 
 echo ""
 echo "=== Teardown Complete ==="

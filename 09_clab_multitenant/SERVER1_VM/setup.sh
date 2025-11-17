@@ -4,9 +4,9 @@ set -e
 # Configuration
 VM_NAME="server1"
 BRIDGE_NAME="SERVER1"
-FEDORA_VERSION="39"
-IMAGE_URL="https://download.fedoraproject.org/pub/fedora/linux/releases/${FEDORA_VERSION}/Cloud/x86_64/images/Fedora-Cloud-Base-${FEDORA_VERSION}-1.5.x86_64.qcow2"
-BASE_IMAGE="Fedora-Cloud-Base-${FEDORA_VERSION}-1.5.x86_64.qcow2"
+FEDORA_VERSION="43"
+IMAGE_URL="https://download.fedoraproject.org/pub/fedora/linux/releases/${FEDORA_VERSION}/Cloud/x86_64/images/Fedora-Cloud-Base-Generic-${FEDORA_VERSION}-1.6.x86_64.qcow2"
+BASE_IMAGE="Fedora-Cloud-Base-Generic-${FEDORA_VERSION}-1.6.x86_64.qcow2"
 VM_DISK="${VM_NAME}.qcow2"
 CIDATA_ISO="${VM_NAME}-cidata.iso"
 
@@ -91,8 +91,8 @@ virt-install \
 echo ""
 echo "=== VM Creation Complete ==="
 echo "VM Name: $VM_NAME"
-echo "eth0: Connected to virbr0 (management, DHCP)"
-echo "eth1: Connected to $BRIDGE_NAME (10.1.0.1/31)"
+echo "ens2: Connected to virbr0 (management, 192.168.122.100/24)"
+echo "ens3: Connected to $BRIDGE_NAME (10.1.0.1/31)"
 echo ""
 echo "To access the VM:"
 echo "  virsh console $VM_NAME"
