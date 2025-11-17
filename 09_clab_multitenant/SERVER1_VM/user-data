@@ -1,0 +1,45 @@
+#cloud-config
+hostname: server1
+fqdn: server1.lab.local
+
+# Set password for fedora user (password: fedora)
+chpasswd:
+  list: |
+    fedora:fedora
+  expire: False
+
+# Configure SSH
+ssh_pwauth: True
+disable_root: false
+
+# Network configuration
+write_files:
+  - path: /etc/systemd/network/10-eth1.network
+    content: |
+      [Match]
+      Name=eth1
+
+      [Network]
+      Address=10.1.0.1/31
+      Gateway=10.1.0.0
+
+  - path: /etc/systemd/network/10-eth0.network
+    content: |
+      [Match]
+      Name=eth0
+
+      [Network]
+      DHCP=yes
+
+runcmd:
+  - systemctl restart systemd-networkd
+  - systemctl enable systemd-networkd
+
+# Install useful packages
+packages:
+  - tcpdump
+  - net-tools
+  - iproute
+  - iputils
+  - traceroute
+  - bind-utils

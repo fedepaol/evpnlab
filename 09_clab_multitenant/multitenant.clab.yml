@@ -52,13 +52,7 @@ topology:
         - spine/setup.sh:/setup.sh
 
     SERVER1:
-      kind: linux
-      image: praqma/network-multitool:latest
-      cpu: 0.25
-      memory: 256m
-      binds:
-        - SERVER1/setup.sh:/setup.sh
-      cmd: bash /setup.sh
+      kind: bridge
 
     SERVER2:
       kind: linux
