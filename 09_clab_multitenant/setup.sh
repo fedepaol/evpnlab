@@ -24,3 +24,6 @@ sudo clab deploy --reconfigure --topo multitenant.clab.yml
 #docker exec clab-evpnl3-borderleaf /setup.sh
 #docker exec clab-evpnl3-storageleaf /setup.sh
 docker exec clab-evpnl3-spine /setup.sh
+pusdh SERVER1_VM
+setup.sh
+popd
