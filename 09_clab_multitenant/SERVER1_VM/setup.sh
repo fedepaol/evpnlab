@@ -4,9 +4,9 @@ set -e
 # Configuration
 VM_NAME="server1"
 BRIDGE_NAME="SERVER1"
-FEDORA_VERSION="41"
-IMAGE_URL="https://download.fedoraproject.org/pub/fedora/linux/releases/${FEDORA_VERSION}/Cloud/x86_64/images/Fedora-Cloud-Base-Generic.x86_64-${FEDORA_VERSION}-1.4.qcow2"
-BASE_IMAGE="Fedora-Cloud-Base-${FEDORA_VERSION}.qcow2"
+FEDORA_VERSION="39"
+IMAGE_URL="https://download.fedoraproject.org/pub/fedora/linux/releases/${FEDORA_VERSION}/Cloud/x86_64/images/Fedora-Cloud-Base-${FEDORA_VERSION}-1.5.x86_64.qcow2"
+BASE_IMAGE="Fedora-Cloud-Base-${FEDORA_VERSION}-1.5.x86_64.qcow2"
 VM_DISK="${VM_NAME}.qcow2"
 CIDATA_ISO="${VM_NAME}-cidata.iso"
 
@@ -19,17 +19,17 @@ echo "Working directory: $SCRIPT_DIR"
 
 # Download Fedora cloud image if not present
 if [ ! -f "$BASE_IMAGE" ]; then
-    echo "Downloading Fedora Cloud image..."
+    echo "Downloading Fedora Cloud Base image..."
     curl -L -o "$BASE_IMAGE" "$IMAGE_URL"
 else
-    echo "Fedora Cloud image already exists: $BASE_IMAGE"
+    echo "Fedora Cloud Base image already exists: $BASE_IMAGE"
 fi
 
 # Create VM disk from base image
 if [ ! -f "$VM_DISK" ]; then
     echo "Creating VM disk from base image..."
     cp "$BASE_IMAGE" "$VM_DISK"
-    qemu-img resize "$VM_DISK" 20G
+    qemu-img resize "$VM_DISK" 10G
 else
     echo "VM disk already exists: $VM_DISK"
 fi
@@ -39,11 +39,11 @@ echo "Creating cloud-init ISO..."
 if command -v genisoimage &> /dev/null; then
     genisoimage -output "$CIDATA_ISO" \
         -volid cidata -joliet -rock \
-        user-data meta-data
+        user-data meta-data network-config
 elif command -v mkisofs &> /dev/null; then
     mkisofs -output "$CIDATA_ISO" \
         -volid cidata -joliet -rock \
-        user-data meta-data
+        user-data meta-data network-config
 else
     echo "Error: Neither genisoimage nor mkisofs found. Please install one of them."
     exit 1
@@ -80,7 +80,7 @@ virt-install \
     --vcpus 1 \
     --disk path="$SCRIPT_DIR/$VM_DISK",device=disk,bus=virtio \
     --disk path="$SCRIPT_DIR/$CIDATA_ISO",device=cdrom \
-    --os-variant fedora41 \
+    --os-variant generic \
     --network bridge=virbr0,model=virtio \
     --network bridge="$BRIDGE_NAME",model=virtio \
     --graphics none \
