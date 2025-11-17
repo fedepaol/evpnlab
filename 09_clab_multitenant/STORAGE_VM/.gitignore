@@ -1,0 +1,5 @@
+# VM disk images
+*.qcow2
+
+# Cloud-init ISO files
+*.iso

@@ -1,0 +1,11 @@
+version: 2
+ethernets:
+  ens2:
+    addresses:
+      - 192.168.122.101/24
+  ens3:
+    addresses:
+      - 10.1.0.7/31
+    routes:
+      - to: 0.0.0.0/0
+        via: 10.1.0.6

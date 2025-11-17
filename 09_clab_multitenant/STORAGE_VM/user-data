@@ -1,0 +1,11 @@
+#cloud-config
+hostname: storage
+
+# Set password for fedora user
+chpasswd:
+  list: |
+    fedora:fedora
+  expire: False
+
+# Configure SSH
+ssh_pwauth: True
