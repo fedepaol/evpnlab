@@ -82,3 +82,23 @@ iface vni400
     vxlan-local-tunnelip 100.64.0.4
     bridge-learning off
     bridge-arp-nd-suppress on
+
+# VRF vrfstorage configuration
+auto vrfstorage
+iface vrfstorage
+    vrf-table 1003
+
+# Bridge and VXLAN for VNI 300 (VRF vrfstorage)
+auto br300
+iface br300
+    bridge-ports vni300
+    vrf vrfstorage
+    hwaddress aa:bb:cc:00:00:34
+
+auto vni300
+iface vni300
+    bridge-access 300
+    vxlan-id 300
+    vxlan-local-tunnelip 100.64.0.4
+    bridge-learning off
+    bridge-arp-nd-suppress on
