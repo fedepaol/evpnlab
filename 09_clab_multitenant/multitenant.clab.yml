@@ -73,13 +73,7 @@ topology:
       cmd: bash /setup.sh
 
     STORAGE:
-      kind: linux
-      image: praqma/network-multitool:latest
-      cpu: 0.25
-      memory: 256m
-      binds:
-        - STORAGE/setup.sh:/setup.sh
-      cmd: bash /setup.sh
+      kind: bridge
 
     INTERNET:
       kind: linux
@@ -91,7 +85,7 @@ topology:
       cmd: bash /setup.sh
 
   links:
-    - endpoints: ["STORAGE:eth1", "storageleaf:swp1"]
+    - endpoints: ["STORAGE:tostorageleaf", "storageleaf:swp1"]
     - endpoints: ["storageleaf:swp2", "spine:tostorageleaf"]
     - endpoints: ["SERVER1:eth1", "leaf1:swp1"]
     - endpoints: ["leaf1:swp2", "spine:toleaf1"]
