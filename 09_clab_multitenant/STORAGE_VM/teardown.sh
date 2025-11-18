@@ -16,7 +16,8 @@ echo "Working directory: $SCRIPT_DIR"
 if virsh dominfo "$VM_NAME" &> /dev/null 2>&1; then
     echo "Destroying VM $VM_NAME..."
     virsh destroy "$VM_NAME" 2>/dev/null || true
-    virsh undefine "$VM_NAME" --remove-all-storage 2>/dev/null || true
+    virsh managedsave-remove "$VM_NAME" 2>/dev/null || true
+    virsh undefine "$VM_NAME" --remove-all-storage --managed-save --nvram 2>/dev/null || true
     echo "VM $VM_NAME destroyed and undefined."
 else
     echo "VM $VM_NAME does not exist."
