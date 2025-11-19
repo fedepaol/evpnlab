@@ -30,14 +30,41 @@ else
     echo "  Warning: STORAGE_VM/teardown.sh not found, skipping"
 fi
 
+# Remove iptables rules for borderleaf traffic
+echo ""
+echo "Step 2: Removing iptables rules..."
+
+# Remove FORWARD rules
+if sudo iptables -C FORWARD -i toborder -j ACCEPT 2>/dev/null; then
+    sudo iptables -D FORWARD -i toborder -j ACCEPT
+    echo "  Removed FORWARD rule for toborder incoming"
+else
+    echo "  FORWARD rule for toborder incoming not found, skipping"
+fi
+
+if sudo iptables -C FORWARD -o toborder -j ACCEPT 2>/dev/null; then
+    sudo iptables -D FORWARD -o toborder -j ACCEPT
+    echo "  Removed FORWARD rule for toborder outgoing"
+else
+    echo "  FORWARD rule for toborder outgoing not found, skipping"
+fi
+
+# Remove masquerade rule
+if sudo iptables -t nat -C POSTROUTING -s 10.1.0.8 ! -o toborder -j MASQUERADE 2>/dev/null; then
+    sudo iptables -t nat -D POSTROUTING -s 10.1.0.8 ! -o toborder -j MASQUERADE
+    echo "  Removed masquerade rule for borderleaf traffic"
+else
+    echo "  Masquerade rule for borderleaf traffic not found, skipping"
+fi
+
 # Destroy containerlab topology
 echo ""
-echo "Step 2: Destroying containerlab topology..."
+echo "Step 3: Destroying containerlab topology..."
 sudo clab destroy --topo multitenant.clab.yml --cleanup
 
 # Remove bridges if they exist
 echo ""
-echo "Step 3: Removing bridges..."
+echo "Step 4: Removing bridges..."
 
 if ip link show "$SERVER1_BRIDGE" &> /dev/null; then
     sudo ip link set "$SERVER1_BRIDGE" down

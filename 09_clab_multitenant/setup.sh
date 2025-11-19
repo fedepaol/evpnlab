@@ -69,3 +69,29 @@ popd
 pushd STORAGE_VM
 ./setup.sh
 popd
+
+sudo ip address add 10.1.0.9/31 dev toborder
+
+# Add FORWARD rule to allow traffic from toborder to be forwarded (idempotent)
+if ! sudo iptables -C FORWARD -i toborder -j ACCEPT 2>/dev/null; then
+    sudo iptables -I FORWARD -i toborder -j ACCEPT
+    echo "Added FORWARD rule for toborder incoming traffic"
+else
+    echo "FORWARD rule for toborder incoming already exists"
+fi
+
+if ! sudo iptables -C FORWARD -o toborder -j ACCEPT 2>/dev/null; then
+    sudo iptables -I FORWARD -o toborder -j ACCEPT
+    echo "Added FORWARD rule for toborder outgoing traffic"
+else
+    echo "FORWARD rule for toborder outgoing already exists"
+fi
+
+# Add masquerade rule for traffic from borderleaf (10.1.0.8) going to internet (idempotent)
+# Traffic from all VRFs will be SNATed to 10.1.0.8 on borderleaf, then masqueraded here to host IP
+if ! sudo iptables -t nat -C POSTROUTING -s 10.1.0.8 ! -o toborder -j MASQUERADE 2>/dev/null; then
+    sudo iptables -t nat -A POSTROUTING -s 10.1.0.8 ! -o toborder -j MASQUERADE
+    echo "Added masquerade rule for traffic from borderleaf"
+else
+    echo "Masquerade rule for borderleaf already exists"
+fi

@@ -75,15 +75,6 @@ topology:
     STORAGE:
       kind: bridge
 
-    INTERNET:
-      kind: linux
-      image: praqma/network-multitool:latest
-      cpu: 0.25
-      memory: 256m
-      binds:
-        - INTERNET/setup.sh:/setup.sh
-      cmd: bash /setup.sh
-
   links:
     - endpoints: ["STORAGE:tostorageleaf", "storageleaf:swp1"]
     - endpoints: ["storageleaf:swp2", "spine:tostorageleaf"]
@@ -93,4 +84,4 @@ topology:
     - endpoints: ["SERVER3:eth1", "leaf2:swp2"]
     - endpoints: ["leaf2:swp3", "spine:toleaf2"]
     - endpoints: ["borderleaf:swp1", "spine:toborderleaf"]
-    - endpoints: ["INTERNET:toborder", "borderleaf:swp2"]
+    - endpoints: ["host:toborder", "borderleaf:swp2"]
