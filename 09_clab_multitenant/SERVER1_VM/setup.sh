@@ -29,7 +29,7 @@ fi
 if [ ! -f "$VM_DISK" ]; then
     echo "Creating VM disk from base image..."
     cp "$BASE_IMAGE" "$VM_DISK"
-    qemu-img resize "$VM_DISK" 10G
+    qemu-img resize "$VM_DISK" 200G
 else
     echo "VM disk already exists: $VM_DISK"
 fi
@@ -76,8 +76,8 @@ fi
 echo "Creating VM $VM_NAME..."
 virt-install \
     --name "$VM_NAME" \
-    --memory 1024 \
-    --vcpus 1 \
+    --memory 49152 \
+    --vcpus 20 \
     --disk path="$SCRIPT_DIR/$VM_DISK",device=disk,bus=virtio \
     --disk path="$SCRIPT_DIR/$CIDATA_ISO",device=cdrom \
     --os-variant generic \
