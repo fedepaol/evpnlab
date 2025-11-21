@@ -76,8 +76,8 @@ fi
 echo "Creating VM $VM_NAME..."
 virt-install \
     --name "$VM_NAME" \
-    --memory 1024 \
-    --vcpus 1 \
+    --memory 4096 \
+    --vcpus 4 \
     --disk path="$SCRIPT_DIR/$VM_DISK",device=disk,bus=virtio \
     --disk path="$SCRIPT_DIR/$CIDATA_ISO",device=cdrom \
     --os-variant generic \

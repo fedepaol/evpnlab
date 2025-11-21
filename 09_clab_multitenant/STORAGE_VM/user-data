@@ -9,3 +9,154 @@ chpasswd:
 
 # Configure SSH
 ssh_pwauth: True
+
+# Install required packages
+packages:
+  - wget
+  - curl
+  - git
+
+# Run commands after package installation
+runcmd:
+  # Configure DNS via systemd-resolved
+  - mkdir -p /etc/systemd/resolved.conf.d
+  - |
+    cat > /etc/systemd/resolved.conf.d/dns.conf <<'EOF'
+    [Resolve]
+    DNS=8.8.8.8 8.8.4.4
+    FallbackDNS=1.1.1.1 1.0.0.1
+    EOF
+  - systemctl restart systemd-resolved
+  # Create installation script to run after network is ready
+  - |
+    cat > /home/fedora/install-docker.sh <<'SCRIPT'
+    #!/bin/bash
+    set -e
+
+    echo "Installing Docker and kind..."
+
+    # Install Docker
+    sudo dnf install -y docker
+
+    # Start Docker
+    sudo systemctl start docker
+
+    # Add fedora user to docker group
+    sudo usermod -aG docker fedora
+
+    # Install kind
+    curl -Lo /tmp/kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+    sudo mv /tmp/kind /usr/local/bin/kind
+    sudo chmod +x /usr/local/bin/kind
+
+    # Install kubectl
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    sudo mv kubectl /usr/local/bin/kubectl
+    sudo chmod +x /usr/local/bin/kubectl
+
+    echo "Installation complete! Please log out and log back in for docker group membership to take effect."
+    SCRIPT
+  - chmod +x /home/fedora/install-docker.sh
+  - chown fedora:fedora /home/fedora/install-docker.sh
+  # Create MetalLB setup script
+  - |
+    cat > /home/fedora/setup-metallb.sh <<'SCRIPT'
+    #!/bin/bash
+    set -e
+
+    echo "Setting up MetalLB with BGP and deploying nginx..."
+
+    # Create kind cluster if it doesn't exist
+    if ! kind get clusters | grep -q "^kind$"; then
+        echo "Creating kind cluster..."
+        kind create cluster
+    fi
+
+    # Install MetalLB
+    echo "Installing MetalLB..."
+    kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
+
+    # Wait for MetalLB to be ready
+    echo "Waiting for MetalLB controller to be ready..."
+    kubectl wait --namespace metallb-system \
+        --for=condition=ready pod \
+        --selector=app=metallb \
+        --timeout=90s
+
+    # Create MetalLB configuration with BGP
+    echo "Configuring MetalLB with BGP..."
+    cat <<'EOF' | kubectl apply -f -
+    apiVersion: metallb.io/v1beta1
+    kind: IPAddressPool
+    metadata:
+      name: storage-pool
+      namespace: metallb-system
+    spec:
+      addresses:
+      - 10.100.0.0/24
+    ---
+    apiVersion: metallb.io/v1beta1
+    kind: BGPAdvertisement
+    metadata:
+      name: bgp-adv
+      namespace: metallb-system
+    spec:
+      ipAddressPools:
+      - storage-pool
+    ---
+    apiVersion: metallb.io/v1beta2
+    kind: BGPPeer
+    metadata:
+      name: storageleaf
+      namespace: metallb-system
+    spec:
+      myASN: 64515
+      peerASN: 64512
+      peerAddress: 10.1.0.6
+    ---
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: demo
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: nginx
+      namespace: demo
+    spec:
+      replicas: 2
+      selector:
+        matchLabels:
+          app: nginx
+      template:
+        metadata:
+          labels:
+            app: nginx
+        spec:
+          containers:
+          - name: nginx
+            image: nginx:latest
+            ports:
+            - containerPort: 80
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: nginx
+      namespace: demo
+    spec:
+      type: LoadBalancer
+      selector:
+        app: nginx
+      ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 80
+    EOF
+
+    echo "Setup complete!"
+    echo "Check the LoadBalancer IP with: kubectl get svc -n demo nginx"
+    SCRIPT
+  - chmod +x /home/fedora/setup-metallb.sh
+  - chown fedora:fedora /home/fedora/setup-metallb.sh
