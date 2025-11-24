@@ -1,0 +1,125 @@
+#!/bin/bash
+set -e
+
+echo "=== Storage VM Setup Script ==="
+echo ""
+
+# Install FRR
+echo "=== Installing FRR ==="
+sudo dnf install -y frr
+
+# Enable IP forwarding
+echo "=== Enabling IP forwarding ==="
+sudo sysctl -w net.ipv4.ip_forward=1
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+
+# Configure loopback interface with IP to advertise
+echo "=== Configuring loopback interface ==="
+sudo ip addr add 10.200.0.1/32 dev lo 2>/dev/null || echo "Loopback IP already configured"
+
+# Enable FRR daemons
+echo "=== Enabling BGP daemon ==="
+sudo sed -i 's/bgpd=no/bgpd=yes/' /etc/frr/daemons
+
+# Create FRR configuration
+echo "=== Creating FRR configuration ==="
+sudo tee /etc/frr/frr.conf > /dev/null <<'EOF'
+frr version 8.0
+frr defaults traditional
+hostname storage
+log syslog informational
+service integrated-vtysh-config
+!
+router bgp 64515
+ bgp router-id 10.1.0.7
+ no bgp default ipv4-unicast
+ neighbor 10.1.0.6 remote-as 64512
+ !
+ address-family ipv4 unicast
+  network 10.200.0.1/32
+  neighbor 10.1.0.6 activate
+ exit-address-family
+!
+line vty
+!
+EOF
+
+# Set proper permissions
+sudo chown frr:frr /etc/frr/frr.conf
+sudo chmod 640 /etc/frr/frr.conf
+
+# Start FRR
+echo "=== Starting FRR ==="
+sudo systemctl enable frr
+sudo systemctl restart frr
+
+echo ""
+echo "=== FRR configured and started ==="
+echo ""
+
+# Wait a moment for BGP to initialize
+sleep 2
+
+# Show BGP status
+echo "BGP Summary:"
+sudo vtysh -c 'show bgp summary'
+echo ""
+
+# Create HTTP server content
+echo "=== Setting up HTTP server ==="
+mkdir -p /var/www/storage
+cat > /var/www/storage/index.html <<'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Storage VM</title>
+</head>
+<body>
+    <h1>Storage VM HTTP Server</h1>
+    <p>This server is running on the storage VM and is reachable via BGP-advertised IP.</p>
+    <p>Server IP: 10.200.0.1</p>
+    <p>Hostname: storage</p>
+</body>
+</html>
+EOF
+
+# Create systemd service for HTTP server
+echo "=== Creating HTTP server systemd service ==="
+sudo tee /etc/systemd/system/storage-http.service > /dev/null <<'EOF'
+[Unit]
+Description=Storage VM HTTP Server
+After=network.target frr.service
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/storage
+ExecStart=/usr/bin/python3 -m http.server 8080 --bind 10.200.0.1
+Restart=always
+User=fedora
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Start HTTP server
+sudo systemctl daemon-reload
+sudo systemctl enable storage-http.service
+sudo systemctl restart storage-http.service
+
+echo ""
+echo "=== HTTP server started on 10.200.0.1:8080 ==="
+echo ""
+echo "=== Setup complete! ==="
+echo ""
+echo "To verify BGP peering:"
+echo "  sudo vtysh -c 'show bgp summary'"
+echo ""
+echo "To verify advertised routes:"
+echo "  sudo vtysh -c 'show bgp ipv4 unicast'"
+echo ""
+echo "To check HTTP server status:"
+echo "  sudo systemctl status storage-http.service"
+echo ""
+echo "To test HTTP server locally:"
+echo "  curl http://10.200.0.1:8080"
+echo ""

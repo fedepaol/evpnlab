@@ -10,11 +10,16 @@ chpasswd:
 # Configure SSH
 ssh_pwauth: True
 
-# Configure DNS to use Google DNS
-manage_resolv_conf: true
-resolv_conf:
-  nameservers:
-    - '8.8.8.8'
+runcmd:
+  # Configure DNS via systemd-resolved
+  - mkdir -p /etc/systemd/resolved.conf.d
+  - |
+    cat > /etc/systemd/resolved.conf.d/dns.conf <<'EOF'
+    [Resolve]
+    DNS=8.8.8.8 8.8.4.4
+    FallbackDNS=1.1.1.1 1.0.0.1
+    EOF
+  - systemctl restart systemd-resolved
 
 # Write setup script to the VM
 write_files:
@@ -90,8 +95,8 @@ write_files:
 
       # Create HTTP server content
       echo "=== Setting up HTTP server ==="
-      mkdir -p /var/www/storage
-      cat > /var/www/storage/index.html <<'EOF'
+      sudo mkdir -p /var/www/storage
+      sudo tee /var/www/storage/index.html > /dev/null <<'EOF'
       <!DOCTYPE html>
       <html>
       <head>
