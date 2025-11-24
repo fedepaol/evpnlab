@@ -66,7 +66,7 @@ iface external
 auto swp2
 iface swp2
     vrf external
-    address 10.1.0.8/31
+    address 192.168.255.8/31
     post-up ip vrf exec external iptables -t nat -A POSTROUTING -o swp2 -j MASQUERADE
     pre-down ip vrf exec external iptables -t nat -D POSTROUTING -o swp2 -j MASQUERADE || true
 

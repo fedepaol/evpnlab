@@ -35,7 +35,7 @@ ip link add external type vrf table 1400
 ip link set external up
 
 ip link set tointernet master external
-ip addr add 10.1.0.8/31 dev tointernet
+ip addr add 192.168.255.8/31 dev tointernet
 
 ip link add br400 type bridge
 ip link set br400 master external addrgenmode none
