@@ -44,6 +44,8 @@ write_files:
       # Configure loopback interface with IP to advertise
       echo "=== Configuring loopback interface ==="
       sudo ip addr add 10.200.0.1/32 dev lo 2>/dev/null || echo "Loopback IP already configured"
+      # Add route so FRR network statement can find it
+      sudo ip route add 10.200.0.1/32 dev lo 2>/dev/null || echo "Loopback route already configured"
 
       # Enable FRR daemons
       echo "=== Enabling BGP daemon ==="
@@ -58,6 +60,8 @@ write_files:
       log syslog informational
       service integrated-vtysh-config
       !
+      route-map ALLOW-ALL permit 10
+      !
       router bgp 64515
        bgp router-id 10.1.0.7
        no bgp default ipv4-unicast
@@ -66,6 +70,8 @@ write_files:
        address-family ipv4 unicast
         network 10.200.0.1/32
         neighbor 10.1.0.6 activate
+        neighbor 10.1.0.6 route-map ALLOW-ALL in
+        neighbor 10.1.0.6 route-map ALLOW-ALL out
        exit-address-family
       !
       line vty
