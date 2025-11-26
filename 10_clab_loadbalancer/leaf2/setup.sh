@@ -8,6 +8,12 @@ ip addr add 192.168.1.3/24 dev eth1
 ip link add red type vrf table 1100
 ip link set red up
 
+# Loopback in red VRF
+ip link add lored type dummy
+ip link set lored master red
+ip addr add 10.255.255.1/32 dev lored
+ip link set lored up
+
 ip link add br10 type bridge
 ip link set br10 master red
 ip link set br10 addr aa:bb:cc:00:00:64
@@ -30,6 +36,9 @@ ip link set vni111 up
 
 ip link set eth4 master red
 ip addr add 192.170.10.0/24 dev eth4
+
+# Apply nftables rules for load balancing
+nft -f /nftables.conf
 
 ip link add br100 type bridge
 ip link set br100 master red addrgenmode none

@@ -10,6 +10,7 @@ topology:
         - leaf1/frr.conf:/etc/frr/frr.conf
         - leaf1/vtysh.conf:/etc/frr/vtysh.conf
         - leaf1/setup.sh:/setup.sh
+        - leaf1/nftables.conf:/nftables.conf
     leaf2:
       kind: linux
       image: frr-keepalived:latest
@@ -18,6 +19,7 @@ topology:
         - leaf2/vtysh.conf:/etc/frr/vtysh.conf
         - leaf2/frr.conf:/etc/frr/frr.conf
         - leaf2/setup.sh:/setup.sh
+        - leaf2/nftables.conf:/nftables.conf
     spine:
       kind: linux
       image: quay.io/frrouting/frr:9.0.0
