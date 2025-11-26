@@ -1,0 +1,16 @@
+FROM quay.io/frrouting/frr:9.0.0
+
+# Install nftables and other useful networking tools
+RUN apk update && \
+    apk add --no-cache \
+    nftables \
+    bash \
+    iproute2 \
+    tcpdump \
+    && rm -rf /var/cache/apk/*
+
+# Ensure FRR can run
+RUN mkdir -p /var/log/frr && \
+    chown frr:frr /var/log/frr
+
+CMD ["/bin/bash"]
