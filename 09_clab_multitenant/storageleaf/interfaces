@@ -2,6 +2,7 @@
 auto lo
 iface lo inet loopback
     address 100.64.0.3/32
+    vxlan-local-tunnelip 100.64.0.3
 
 # Management interface
 auto eth0
@@ -17,88 +18,63 @@ auto swp2
 iface swp2
     address 10.0.0.1/31
 
-# VRF red configuration
-auto red
-iface red
-    vrf-table 1100
-
-# Bridge and VXLAN for VNI 100 (VRF red)
-auto br100
-iface br100
-    bridge-ports vni100
-    vrf red
-    hwaddress aa:bb:cc:00:00:03
-
-auto vni100
-iface vni100
-    bridge-access 100
-    vxlan-id 100
-    vxlan-local-tunnelip 100.64.0.3
-    bridge-learning off
-    bridge-arp-nd-suppress on
-
-# VRF blue configuration
-auto blue
-iface blue
-    vrf-table 1200
-
-# Bridge and VXLAN for VNI 200 (VRF blue)
-auto br200
-iface br200
-    bridge-ports vni200
-    vrf blue
-    hwaddress aa:bb:cc:00:00:13
-
-auto vni200
-iface vni200
-    bridge-access 200
-    vxlan-id 200
-    vxlan-local-tunnelip 100.64.0.3
-    bridge-learning off
-    bridge-arp-nd-suppress on
-
-# VRF vrfstorage configuration
-auto vrfstorage
-iface vrfstorage
-    vrf-table 1003
-
-# Storage-facing interface in VRF vrfstorage
+# Storage-facing interface
 auto swp1
 iface swp1
-    vrf vrfstorage
     address 10.1.0.6/31
-
-# Bridge and VXLAN for VNI 300 (VRF vrfstorage)
-auto br300
-iface br300
-    bridge-ports vni300
     vrf vrfstorage
-    hwaddress aa:bb:cc:00:00:23
 
-auto vni300
-iface vni300
-    bridge-access 300
-    vxlan-id 300
-    vxlan-local-tunnelip 100.64.0.3
-    bridge-learning off
-    bridge-arp-nd-suppress on
+# VRF definitions
+auto red
+iface red
+    vrf-table auto
 
-# VRF external configuration
+auto blue
+iface blue
+    vrf-table auto
+
+auto vrfstorage
+iface vrfstorage
+    vrf-table auto
+
 auto external
 iface external
-    vrf-table 1004
+    vrf-table auto
 
-# Bridge and VXLAN for VNI 400 (VRF external)
-auto br400
-iface br400
-    bridge-ports vni400
+# L3VNI SVIs (one per VRF)
+auto vlan100_l3
+iface vlan100_l3
+    vrf red
+    vlan-raw-device br_l3vni
+    vlan-id 100
+
+auto vlan200_l3
+iface vlan200_l3
+    vrf blue
+    vlan-raw-device br_l3vni
+    vlan-id 200
+
+auto vlan300_l3
+iface vlan300_l3
+    vrf vrfstorage
+    vlan-raw-device br_l3vni
+    vlan-id 300
+
+auto vlan400_l3
+iface vlan400_l3
     vrf external
-    hwaddress aa:bb:cc:00:00:33
+    vlan-raw-device br_l3vni
+    vlan-id 400
 
-auto vni400
-iface vni400
-    bridge-access 400
-    vxlan-id 400
-    vxlan-local-tunnelip 100.64.0.3
+# Single VXLAN interface with VNI filtering
+auto vxlan99
+iface vxlan99
+    bridge-vlan-vni-map 100=100 200=200 300=300 400=400
     bridge-learning off
-    bridge-arp-nd-suppress on
+
+# Single L3VNI bridge
+auto br_l3vni
+iface br_l3vni
+    bridge-ports vxlan99
+    hwaddress aa:bb:cc:00:00:23
+    bridge-vlan-aware yes

@@ -29,9 +29,9 @@ topology:
       cpu: 1.5
       memory: 2g
       binds:
-        - leaf1/interfaces:/etc/network/interfaces
-        - leaf1/frr.conf:/etc/frr/frr.conf
+        - leaf1/setup_nvue.sh:/setup_nvue.sh
         - leaf1/daemons:/etc/frr/daemons
+      cmd: bash /setup_nvue.sh
     leaf2:
       kind: cumulus_cvx
       image: networkop/cx:5.3.0
